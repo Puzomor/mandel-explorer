@@ -1,6 +1,7 @@
 #include <string>
 #include <fstream>
 #include <iostream>
+#include <ctime>
 
 #include "custom_bitmap.h"
 #include "Setup.h"
@@ -15,17 +16,13 @@ const double pi = atan(1) * 4;
 enum StyleList {LogLog, Log, Sqrt, Line, Quad, Sine, Clean};
 
 double distanceFromCenter(double a, double b);
+double getStyle(double iter, double maxIter, int style);
 
 void convert(int x, int y, double &newx, double &newy, Setup set0);
+void renderBMP(Setup set0);
 void printTestPage();
 
-double getStyle(double iter, double maxIter, int style);
-double avgStyle(double iter, double maxIter, int style1, int style2);
-double avgStyle2(double iter, double maxIter, int style1, int style2);
-
 int userInput(Setup &set0);
-
-void renderBMP(Setup set0);
 
 int main()
 {
@@ -33,7 +30,6 @@ int main()
 
 	double distance;
 	double mathx, mathy;
-	//double testx, testy;
 	double newx, newy, tempx;
 	double xSq, ySq;
 	double final_style;
@@ -44,8 +40,7 @@ int main()
 	int isMandel = 1;
 
 	char draw;
-
-	char colors[n_colors] = "#:,.:-_-_-YVY:;:;:;nm**^*^*ooocgcgcgc1I1I1I1I1I+o+*'/|-_-;:,.,.";
+	char colors[n_colors] = "#@&%8HMWN0OVUBDG€3CXYZPLftjil1I()/|[]{}pqdbymwnoeacsxvurz;:+>=-";
 
 	printTestPage();
 
@@ -96,26 +91,12 @@ int main()
 				
 				if (distance==CENTER)
 					cout << '+';
-				else if (x==40 && y==39)
-					cout << 'o';
 				else if (isMandel==1)
 					cout << ' ';
-				else {
+				else
 					cout << draw;
-				}
 				
 			}
-
-		/* DEBUG ONLY
-		cout << endl;
-		convert(0, 0, testx, testy, set1);
-		cout << "screen's ( 0,  0) equals to mathematic (" << testx << ", " << testy << ")" << endl;
-		convert(40, 39, testx, testy, set1);
-		cout << "screen's (40, 39) equals to mathematic (" << testx << ", " << testy << ")" << endl;
-		convert(80, 78, testx, testy, set1);
-		cout << "screen's (80, 78) equals to mathematic (" << testx << ", " << testy << ")" << endl;
-		cout << "zoom = 2^" << set1.getZoom() << " (" << pow(2, set1.getZoom()) << ")" << endl;
-		*/
 	}
 
 	return 0;
@@ -249,7 +230,7 @@ int userInput(Setup &set0)
 			cout << "Style number:";
 			cin >> s1;
 
-			set0.setStyle(s1);
+			set0.setStyle(s1); 
 		}
 	}
 
@@ -264,7 +245,7 @@ int userInput(Setup &set0)
 		set0.setMaxIter(iter);
 	}
 
-	else if (command == "reset")
+	else if (command == "reset" || command=="render")
 	{
 		set0.reset();
 	}
@@ -281,7 +262,7 @@ int userInput(Setup &set0)
 		return userInput(set0);
 	}
 
-	else if (command == "render" || command == "reset")
+	else if (command == "export")
 	{
 		renderBMP(set0);
 		return userInput(set0);
@@ -289,7 +270,7 @@ int userInput(Setup &set0)
 
 	else if (command == "help")
 	{
-		cout << "\tw\t - \tmove up" << endl;
+		cout		 << "\t" << "w"			<< "\t - \t" << "move up" << endl;
 		cout << endl << "\t" << "a"			<< "\t - \t" << "move left" << endl;
 		cout << endl << "\t" << "s"			<< "\t - \t" << "move down" << endl;
 		cout << endl << "\t" << "d"			<< "\t - \t" << "move right" << endl;
@@ -299,11 +280,11 @@ int userInput(Setup &set0)
 		cout << endl << "\t" << "E"			<< "\t - \t" << "normal zoom in" << endl;
 		cout << endl << "\t" << "style"		<< "\t - \t" << "view and set gradient color picking style" << endl;
 		cout << endl << "\t" << "iter"		<< "\t - \t" << "show and change iteration limit" << endl;
-		cout << endl << "\t" << "reset"		<< "\t - \t" << "redraw image and reset position and zoom" << endl;
+		cout << endl << "\t" << "render"	<< "\t - \t" << "redraw image and reset position and zoom" << endl;
 		cout << endl << "\t" << "getinfo"	<< "\t - \t" << "get current position info" << endl;
 		cout << endl << "\t" << "help"		<< "\t - \t" << "show this" << endl;
-		cout << endl << "\t" << "exit"		<< "\t - \t" << "exit" <<  endl;
 		cout << endl << "\t" << "export"	<< "\t - \t" << "exports the current screen in .bmp format" << endl;
+		cout << endl << "\t" << "exit" << "\t - \t" << "exit" << endl;
 
 		return userInput(set0);
 	}
@@ -322,9 +303,9 @@ int userInput(Setup &set0)
 
 void printTestPage()
 {
-	cout << endl << "Set the console font to \"raster font\" with size 8x8 pixels." << endl << endl;
-	cout << "Maximize the console window" << endl << endl;
-	cout << "Type 'render' to close this screen or 'help' for list of commands." << endl << endl;
+	cout << endl	<< "Set the console font to \"raster font\" with size 8x8 pixels." << endl << endl;
+	cout			<< "Maximize the console window" << endl << endl;
+	cout			<< "Type 'render' to close this screen or 'help' for list of commands." << endl << endl;
 }
 
 void renderBMP(Setup set0)
@@ -339,12 +320,16 @@ void renderBMP(Setup set0)
 	BYTE padding;
 
 	string filename;
+	string path;
+
+	clock_t totalClock;
+
 	char inputChar;
 
 	int width, height;
 	int minDimension;
 	int iter_limit;
-	int style1, style2;
+	int style1;
 	int renderNo=0;
 
 	iter_limit = set0.getMaxIter();
@@ -359,6 +344,12 @@ void renderBMP(Setup set0)
 	cout << "Image height: ";
 	cin >> height;
 
+	if (width*height >= 100000000)
+	{
+		cout << "File too large. Width x Height cannot exceed 100 000 000" << endl;
+		return;
+	}
+
 	minDimension = width;
 	if (height < minDimension)
 		minDimension = height;
@@ -371,14 +362,18 @@ void renderBMP(Setup set0)
 	padding = ((4 - ((width * 3) % 4)) % 4);
 	Pixel * pixMap = new Pixel[(width + padding)*height];
 
+	path = "images\\";
 	cout << "File name: ";
 	cin >> filename;
 
-	bmpfile.open(filename);
+	path.append(filename);
+	path.append(".bmp");
+
+	bmpfile.open(path);
 
 	if (bmpfile.is_open())
 	{
-		cout << "Owerwrite? (y/n) ";
+		cout << "Overwrite? (y/n) ";
 		cin >> inputChar;
 
 		if (inputChar == 'n')
@@ -392,9 +387,13 @@ void renderBMP(Setup set0)
 	bmpfile.close();
 
 	cout << "Fetching screen data... ";
+	totalClock = clock();
 
 	for (int y = 0; y<height; y++)
 	{
+		if (int((y*10.0) / height) == (y*10.0) / height)
+			cout << int(100 * y / height) << "% ";
+
 		for (int x = 0; x < width; x++)
 		{
 			convert(x, y, mathx, mathy, set0);
@@ -417,7 +416,7 @@ void renderBMP(Setup set0)
 					else if (final_style > 1) final_style = 1;
 
 					color = 0xFFFFFF;
-					color *= final_style;
+					color = DWORD(color*final_style);
 					if (color == 0)
 						color = 0xFFFFFF;
 
@@ -431,31 +430,21 @@ void renderBMP(Setup set0)
 				newx += mathx;
 			}
 
-			if (x == int(width / 2) && y == int(height / 2))
-				color = 0xFF0000;
-
-			//color = 0xFFFFFF;
 			pixMap[y*width + x].setColor(color);
 		}
 	}
 
-	cout << "done! " << endl;
-	cout << "Creating virtual BMP... ";
+	cout << endl << "Creating virtual BMP... ";
 
 	bitmap01.setHeader(width, height);
-	//cout << "DEBUG##" << filename << "/padding :" << int(bitmap01.get_padding()) << endl; DEBUG ONLY
 	bitmap01.setData(pixMap, width, height);
-
-	cout << "done! " << endl;
 
 	delete pixMap;
 
 	char * charTemp = new (char);
 
-	//filename = "render.bmp";
-	bmpfile.open(filename, fstream::out | fstream::trunc | fstream::binary);
+	bmpfile.open(path, fstream::out | fstream::trunc | fstream::binary);
 
-	cout << "Writing header... ";
 	for (int i = 0; i < 14; i++)
 	{
 		*charTemp = bitmap01.get_file_header(i);
@@ -467,18 +456,25 @@ void renderBMP(Setup set0)
 		bmpfile.write(charTemp, sizeof(BYTE));
 	}
 
-	cout << "done!" << endl << "Writing bitmap... ";
-	for (int i = 0; i < bitmap01.get_bitmap_size(); i++)
+	cout << endl << "Writing bitmap......... ";
+
+	int size = bitmap01.get_bitmap_size();
+	for (int i = 0; i < size; i++)
 	{
+		if (int((i*10.0) / size) == (i*10.0) / size)
+			cout << int(100 * i / size) << "% ";
+
 		*charTemp = bitmap01.get_bitmap_data(i);
 		bmpfile.write(charTemp, sizeof(BYTE));
 	}
 
-	cout << "done!" << endl;
+	totalClock = clock() - totalClock;
+
+	cout << endl << "Total time: " << float(totalClock) / CLOCKS_PER_SEC << "s" << endl << endl;
 
 	delete charTemp;
 
-	cout << "Exporting done. File saved as: " << filename << endl;
+	cout << "Exporting done. File saved: " << path << endl;
 
 	bmpfile.close();
 }
