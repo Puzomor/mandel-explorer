@@ -15,6 +15,10 @@ class Pixel {
 public:
 	void setColor(BYTE red, BYTE green, BYTE blue);
 	void setColor(DWORD value);
+	void setRed(BYTE red) { this->red = red; }
+	void setGreen(BYTE green) { this->green = green; }
+	void setBlue(BYTE blue) { this->blue = blue; }
+
 	BYTE getRed(){ return red; }
 	BYTE getGreen(){ return green; }
 	BYTE getBlue(){ return blue; }

@@ -178,7 +178,7 @@ void BMP_file::setData(Pixel* pixelMap, int width, int height)
 	for (int i = 0; i < height; i++)
 	{
 		if (int((i*10.0) / height) == (i*10.0) / height)
-			cout << int(100 * i / height) << "% ";
+			cout << int(100.0 * i / height) << "% ";
 
 		for (int j = 0; j < width; j++)
 		{
