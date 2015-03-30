@@ -22,6 +22,17 @@ void convert(int x, int y, double &newx, double &newy, Setup set0);
 void renderBMP(Setup set0);
 void printTestPage();
 
+void abortRender(int &a)
+{
+	a = 0;
+	string input;
+	do
+	{
+		cin >> input;
+	} while (input != "abort");
+	a = 1;
+}
+
 int userInput(Setup &set0);
 
 int main()
@@ -89,9 +100,9 @@ int main()
 
 				distance=distanceFromCenter(mathx,mathy);
 				
-				if (distance==CENTER)
+				if (distance == CENTER)
 					cout << '+';
-				else if (isMandel==1)
+				else if (isMandel == 1)
 					cout << ' ';
 				else
 					cout << draw;
@@ -131,12 +142,11 @@ double getStyle(double iter, double maxIter, int style)
 	// 0:
 	if (style == LogLog) // loglog ftw
 	{
-		iter = iter + 1;
+		double tmp = iter;
+		iter = log(4);
 		iter = log(iter);
-		iter = iter / log(maxIter + 1);
-		iter = iter + 1;
-		iter = log(iter);
-		iter = iter / log(maxIter + 1);
+		iter /= log(2);
+		iter = tmp - iter;
 	}
 
 	// 1:
@@ -264,6 +274,7 @@ int userInput(Setup &set0)
 
 	else if (command == "export")
 	{
+
 		renderBMP(set0);
 		return userInput(set0);
 	}
@@ -316,6 +327,7 @@ void renderBMP(Setup set0)
 	double final_style;
 	double scale;
 
+	BYTE col2;
 	DWORD color;
 	BYTE padding;
 
@@ -343,12 +355,6 @@ void renderBMP(Setup set0)
 	cin >> width;
 	cout << "Image height: ";
 	cin >> height;
-
-	if (width*height >= 100000000)
-	{
-		cout << "File too large. Width x Height cannot exceed 100 000 000" << endl;
-		return;
-	}
 
 	minDimension = width;
 	if (height < minDimension)
@@ -410,15 +416,11 @@ void renderBMP(Setup set0)
 
 				if (4 <= xSq + ySq)
 				{
-					final_style = getStyle(iter, iter_limit, style1);
-
-					if (final_style < 0) final_style = 0;
-					else if (final_style > 1) final_style = 1;
+					final_style = iter%iter_limit;
+					//final_style = getStyle(final_style, iter_limit, style1);16,777,215 10,066,329
 
 					color = 0xFFFFFF;
 					color = DWORD(color*final_style);
-					if (color == 0)
-						color = 0xFFFFFF;
 
 					break;
 				}
@@ -430,7 +432,11 @@ void renderBMP(Setup set0)
 				newx += mathx;
 			}
 
+			color = 0xFFFFFF;
 			pixMap[y*width + x].setColor(color);
+			pixMap[y*width + x].setRed(pixMap[y*width + x].getRed()/2);
+			pixMap[y*width + x].setGreen(pixMap[y*width + x].getGreen()/2);
+			pixMap[y*width + x].setBlue(pixMap[y*width + x].getBlue()/2);
 		}
 	}
 
