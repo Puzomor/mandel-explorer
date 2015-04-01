@@ -64,10 +64,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="custom_bitmap.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="Setup.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="custom_bitmap.h" />
     <ClInclude Include="Setup.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

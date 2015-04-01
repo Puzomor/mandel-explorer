@@ -10,31 +10,30 @@ class Setup {
 	double height;
 	int maxIter;
 	int style1;
-	int style2;
 
-	double multip() { return 10 * pow(2, zoom); }
+	double multip(double amount) { return amount * pow(2, -zoom); }
 
 public:
 	int getMaxIter(){ return maxIter; }
 	int getStyle1() { return style1; }
-	int getStyle2() { return style2; }
 	double getZoom() { return zoom; }
 	double getHeight() { return height; }
 	double getWidth() { return width; }
 	double getOffsetX() { return offsetx; }
 	double getOffsetY() { return offsety; }
 
-	void setStyle	(int s1, int s2);
+	void setStyle	(int s1);
 	void setMaxIter	(int iter) { maxIter = iter; }
+	void setRes		(double width, double height);
 
-	void goUp		()					{ offsety += multip(); }
-	void goDown		()					{ offsety -= multip(); }
-	void goRight	()					{ offsetx -= multip(); }
-	void goLeft		()					{ offsetx += multip(); }
-	void zoomIn		(double amount)		{ zoom += amount; }
+	void goUp(double amount){ offsety -= multip(amount); }
+	void goDown(double amount){ offsety += multip(amount); }
+	void goRight(double amount){ offsetx += multip(amount); }
+	void goLeft(double amount){ offsetx -= multip(amount); }
+	void zoomIn(double amount){ zoom += amount; }
 	void reset();
 
 	Setup();
 
-	Setup(double zoom, double offset_x, double offset_y, double width, double height, int max_iter, int style1, int style2);
+	Setup(double zoom, double offset_x, double offset_y, double width, double height, int max_iter, int style1);
 };
