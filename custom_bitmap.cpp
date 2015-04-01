@@ -3,14 +3,9 @@
 
 void Word::setValue(WORD value)
 {
-	// dec_value looks like this [firstByte][secondByte]
-	// byte[0] = [secondByte]
-	// byte[1] = [firstByte]
-	// word_value should look like this [secondByte][firstByte]
-
 	dec_value = value;
 
-	byte[1] = dec_value >> 8; // 8 bits shift = 1 Byte shift
+	byte[1] = dec_value >> 8;
 	byte[0] = dec_value - (byte[1] << 8);
 	word_value = byte[0];
 	word_value <<= 8;
@@ -19,15 +14,6 @@ void Word::setValue(WORD value)
 
 void DWord::setValue(DWORD value)
 {
-	// dec_value looks like this [firstByte][secondByte][thirdByte][fourthByte]
-
-	// byte[0] = [fourthByte]
-	// byte[1] = [thirdByte]
-	// byte[2] = [secondByte]
-	// byte[3] = [firstbyte]
-
-	// dword_value should look like this [fourthByte][thirdByte][secondByte][firstByte]
-
 	dec_value = value;
 
 	byte[3] = (dec_value & 0xff000000) >> 8 * 3;
@@ -170,34 +156,6 @@ void Pixel::setColor(DWORD value)
 	blue	= (value & 0x000000ff) >> 8 * 0;
 }
 
-void BMP_file::setData(Pixel* pixelMap, int width, int height)
-{
-	Pixel tmpPixel;
-	BYTE red, green, blue;
-
-	for (int i = 0; i < height; i++)
-	{
-		if (int((i*10.0) / height) == (i*10.0) / height)
-			cout << int(100.0 * i / height) << "% ";
-
-		for (int j = 0; j < width; j++)
-		{
-			tmpPixel = *(pixelMap + i*width + j);
-
-			red = tmpPixel.getRed();
-			green = tmpPixel.getGreen();
-			blue = tmpPixel.getBlue();
-
-			bitmap_data.push_back(blue);
-			bitmap_data.push_back(green);
-			bitmap_data.push_back(red);
-		}
-
-		for (int j = 0; j < padding; j++)
-			bitmap_data.push_back(BYTE(0x00));
-	}
-}
-
 BYTE BMP_file::get_file_header(int index)
 {
 	return file_header[index];
@@ -206,9 +164,4 @@ BYTE BMP_file::get_file_header(int index)
 BYTE BMP_file::get_bitmap_header(int index)
 {
 	return bitmap_header[index];
-}
-
-BYTE BMP_file::get_bitmap_data(int index)
-{
-	return bitmap_data[index];
 }

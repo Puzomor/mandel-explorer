@@ -211,10 +211,10 @@ int userInput(Setup &set0)
 	cout << "> ";
 	cin >> command;
 
-	if		(command == "w") set0.goUp();
-	else if (command == "s") set0.goDown();
-	else if (command == "a") set0.goLeft();
-	else if (command == "d") set0.goRight();
+	if		(command == "w") set0.goUp(5);
+	else if (command == "s") set0.goDown(5);
+	else if (command == "a") set0.goLeft(5);
+	else if (command == "d") set0.goRight(5);
 
 	else if (command == "q") set0.zoomIn(-1);
 	else if (command == "e") set0.zoomIn(1);
@@ -322,12 +322,11 @@ void printTestPage()
 void renderBMP(Setup set0)
 {
 	double mathx, mathy;
-	double newx, newy, tempx;
+	double newx, newy;
 	double xSq, ySq;
 	double final_style;
 	double scale;
 
-	BYTE col2;
 	DWORD color;
 	BYTE padding;
 
@@ -337,12 +336,14 @@ void renderBMP(Setup set0)
 	clock_t totalClock;
 
 	char inputChar;
+	char * charTemp = new (char);
 
 	int width, height;
 	int minDimension;
 	int iter_limit;
 	int style1;
 	int renderNo=0;
+	int percent;
 
 	iter_limit = set0.getMaxIter();
 	style1 = set0.getStyle1();
@@ -366,7 +367,7 @@ void renderBMP(Setup set0)
 	set0.setRes(width, height);
 
 	padding = ((4 - ((width * 3) % 4)) % 4);
-	Pixel * pixMap = new Pixel[(width + padding)*height];
+	Pixel tempPix;
 
 	path = "images\\";
 	cout << "File name: ";
@@ -391,14 +392,32 @@ void renderBMP(Setup set0)
 	}
 
 	bmpfile.close();
+	bmpfile.open(path, fstream::out | fstream::trunc | fstream::binary);
 
-	cout << "Fetching screen data... ";
+	cout << "Exporting... ";
+
 	totalClock = clock();
 
+	bitmap01.setHeader(width, height);
+
+	for (int i = 0; i < 14; i++)
+	{
+		*charTemp = bitmap01.get_file_header(i);
+		bmpfile.write(charTemp, sizeof(BYTE));
+	}
+	for (int i = 0; i < 40; i++)
+	{
+		*charTemp = bitmap01.get_bitmap_header(i);
+		bmpfile.write(charTemp, sizeof(BYTE));
+	}
+	percent = 0;
 	for (int y = 0; y<height; y++)
 	{
-		if (int((y*10.0) / height) == (y*10.0) / height)
-			cout << int(100 * y / height) << "% ";
+		if (int(100 * (float(y) / height)) > percent)
+		{
+			percent = int(100 * (float(y) / height));
+			cout << percent << "% ";
+		}
 
 		for (int x = 0; x < width; x++)
 		{
@@ -416,8 +435,7 @@ void renderBMP(Setup set0)
 
 				if (4 <= xSq + ySq)
 				{
-					final_style = iter%iter_limit;
-					//final_style = getStyle(final_style, iter_limit, style1);16,777,215 10,066,329
+					final_style = getStyle(iter, iter_limit, style1);
 
 					color = 0xFFFFFF;
 					color = DWORD(color*final_style);
@@ -425,53 +443,35 @@ void renderBMP(Setup set0)
 					break;
 				}
 
-				tempx = xSq - ySq;
 				newy = (newx + newx) * newy;
-				newx = tempx;
+				newx = xSq - ySq;
 				newy += mathy;
 				newx += mathx;
+
+				if (iter == iter_limit - 1)
+					final_style = 0;
 			}
 
-			color = 0xFFFFFF;
-			pixMap[y*width + x].setColor(color);
-			pixMap[y*width + x].setRed(pixMap[y*width + x].getRed()/2);
-			pixMap[y*width + x].setGreen(pixMap[y*width + x].getGreen()/2);
-			pixMap[y*width + x].setBlue(pixMap[y*width + x].getBlue()/2);
+			//color = 0xFFFFFF;
+			tempPix.setRed(89*final_style);
+			tempPix.setGreen(169 * final_style);
+			tempPix.setBlue(255 * final_style);
+
+			*charTemp = tempPix.getBlue();
+			bmpfile.write(charTemp, sizeof(BYTE));
+
+			*charTemp = tempPix.getGreen();
+			bmpfile.write(charTemp, sizeof(BYTE));
+
+			*charTemp = tempPix.getRed();
+			bmpfile.write(charTemp, sizeof(BYTE));
+
 		}
-	}
-
-	cout << endl << "Creating virtual BMP... ";
-
-	bitmap01.setHeader(width, height);
-	bitmap01.setData(pixMap, width, height);
-
-	delete pixMap;
-
-	char * charTemp = new (char);
-
-	bmpfile.open(path, fstream::out | fstream::trunc | fstream::binary);
-
-	for (int i = 0; i < 14; i++)
-	{
-		*charTemp = bitmap01.get_file_header(i);
-		bmpfile.write(charTemp, sizeof(BYTE));
-	}
-	for (int i = 0; i < 40; i++)
-	{
-		*charTemp = bitmap01.get_bitmap_header(i);
-		bmpfile.write(charTemp, sizeof(BYTE));
-	}
-
-	cout << endl << "Writing bitmap......... ";
-
-	int size = bitmap01.get_bitmap_size();
-	for (int i = 0; i < size; i++)
-	{
-		if (int((i*10.0) / size) == (i*10.0) / size)
-			cout << int(100 * i / size) << "% ";
-
-		*charTemp = bitmap01.get_bitmap_data(i);
-		bmpfile.write(charTemp, sizeof(BYTE));
+		for (int x = 0; x < bitmap01.get_padding(); x++)
+		{
+			*charTemp = 0;
+			bmpfile.write(charTemp, sizeof(BYTE));
+		}
 	}
 
 	totalClock = clock() - totalClock;
@@ -480,7 +480,13 @@ void renderBMP(Setup set0)
 
 	delete charTemp;
 
-	cout << "Exporting done. File saved: " << path << endl;
+	bmpfile.close();
+	bmpfile.open(path);
+
+	if (bmpfile.is_open())
+		cout << "Exporting done. File saved: " << path << endl;
+	else
+		cout << "Error saving the file." << endl;
 
 	bmpfile.close();
 }

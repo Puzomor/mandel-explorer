@@ -11,7 +11,7 @@ class Setup {
 	int maxIter;
 	int style1;
 
-	double multip() { return 5 * pow(2, -zoom); }
+	double multip(double amount) { return amount * pow(2, -zoom); }
 
 public:
 	int getMaxIter(){ return maxIter; }
@@ -26,11 +26,11 @@ public:
 	void setMaxIter	(int iter) { maxIter = iter; }
 	void setRes		(double width, double height);
 
-	void goUp		()					{ offsety -= multip(); }
-	void goDown		()					{ offsety += multip(); }
-	void goRight	()					{ offsetx += multip(); }
-	void goLeft		()					{ offsetx -= multip(); }
-	void zoomIn(double amount)		{ zoom += amount; }
+	void goUp(double amount){ offsety -= multip(amount); }
+	void goDown(double amount){ offsety += multip(amount); }
+	void goRight(double amount){ offsetx += multip(amount); }
+	void goLeft(double amount){ offsetx -= multip(amount); }
+	void zoomIn(double amount){ zoom += amount; }
 	void reset();
 
 	Setup();

@@ -55,14 +55,10 @@ class BMP_file{
 	BYTE padding;
 	BYTE file_header[14];
 	BYTE bitmap_header[40];
-	vector<BYTE> bitmap_data;
 public:
 	void setHeader(int width, int height);
-	void setData(Pixel* pixelMap, int width, int heigth);
-	int get_bitmap_size() { return bitmap_data.size(); }
 
 	BYTE get_file_header(int index);
 	BYTE get_bitmap_header(int index);
-	BYTE get_bitmap_data(int index);
 	BYTE get_padding() { return padding; }
 };
