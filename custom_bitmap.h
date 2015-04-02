@@ -1,9 +1,5 @@
 #pragma once
 
-#include <vector>
-
-using namespace std;
-
 typedef unsigned char BYTE; // 1 Byte = 8 bits
 typedef unsigned short WORD; // 2 Bytes = 16 bits
 typedef unsigned long DWORD; // 4 Bytes = 32 bits

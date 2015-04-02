@@ -1,5 +1,4 @@
 #include "custom_bitmap.h"
-#include <iostream>
 
 void Word::setValue(WORD value)
 {

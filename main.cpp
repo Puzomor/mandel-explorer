@@ -142,11 +142,10 @@ double getStyle(double iter, double maxIter, int style)
 	// 0:
 	if (style == LogLog) // loglog ftw
 	{
-		double tmp = iter;
-		iter = log(4);
+		iter = iter + 1;
 		iter = log(iter);
-		iter /= log(2);
-		iter = tmp - iter;
+		iter = log(iter);
+		iter = iter / log(maxIter + 1);
 	}
 
 	// 1:
@@ -328,6 +327,7 @@ void renderBMP(Setup set0)
 	double scale;
 
 	DWORD color;
+	color = 0x59A9FF;
 	BYTE padding;
 
 	string filename;
@@ -426,8 +426,6 @@ void renderBMP(Setup set0)
 			newx = mathx;
 			newy = mathy;
 
-			color = 0;
-
 			for (int iter = 0; iter < iter_limit; iter++)
 			{
 				xSq = newx*newx;
@@ -437,8 +435,8 @@ void renderBMP(Setup set0)
 				{
 					final_style = getStyle(iter, iter_limit, style1);
 
-					color = 0xFFFFFF;
-					color = DWORD(color*final_style);
+					if (final_style > 1)
+						final_style = 0;
 
 					break;
 				}
@@ -452,8 +450,7 @@ void renderBMP(Setup set0)
 					final_style = 0;
 			}
 
-			//color = 0xFFFFFF;
-			tempPix.setRed(89*final_style);
+			tempPix.setRed(89 * final_style);
 			tempPix.setGreen(169 * final_style);
 			tempPix.setBlue(255 * final_style);
 
